@@ -3,10 +3,7 @@ title: "TX_Spread"
 author: "Ti-Ti Tung"
 date: "2020/10/1"
 output: 
-  html_document:
-    keep_md: TRUE
-  github_document:
-    html_preview: false
+  html_document
 ---
 
 
