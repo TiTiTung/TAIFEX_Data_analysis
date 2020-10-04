@@ -3,13 +3,16 @@ title: "TX_Spread"
 author: "Ti-Ti Tung"
 date: "2020/10/1"
 output: 
-  html_document
+  html_document: 
+    toc: TRUE
+  github_document: default
 ---
 
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(xts)
 source("packages.you.need.R")
 #==================================================================================
 # T-T-Tung
@@ -116,42 +119,17 @@ data.diff %<>%
 
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-
-
-## 價差統計表
-
-觀察價差變化可以發現，根據越靠近結算，其價差全距 越大，且25百分位數的值負數越大，可從統計資訊得知， 越接近結算轉倉空單越不利。
-
-```{r TX.tabble1, echo=FALSE}
-year_filter <- 2020
-
-TX.diff <- data.diff %>% 
-  filter(year(date) == year_filter)
-
-knitr::kable(
-  TX.diff %>% 
-    filter(T < 6)%>% 
-    group_by(T) %>% 
-    summarise(min = min(Spread),
-              Qu_1st  = quantile(Spread, 0.25),
-              median = median(Spread),
-              mean = mean(Spread) %>% round(2),
-              Qu_3st = quantile(Spread, 0.75),
-              max = max(Spread)) %>% 
-    arrange(desc(T))
-)
-```
-
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-## 所有2009 - 今年以來的價差統計表
+[R highcharts 教學網](https://jkunst.com/highcharter/articles/stock.html)
+
+-----
+
+
+
+
+### 所有2009 - 今年以來的價差統計表
 
 我們可以發現，所有逆價差的異常值全部都是在2020年3月的下殺，所以以下有個年度的圖提供參考：
 
@@ -176,37 +154,39 @@ knitr::kable(
 
 ```
 
+
+
 ```{r TX.spread.all.1, echo=FALSE, message=FALSE, warning=FALSE}
 x <- TX.diff %>% filter(T < 6)
 
 hcboxplot(x = x$Spread , var = x$T , color = "#2980b9") %>% 
   hc_chart(type = "column", color = "#2980b9")%>%
-  hc_title(text = list(str_c("TX ", year_filter, "近遠月價差分佈"))) %>%
+  hc_title(text = list(str_c("TX 2009 - 2020 年近遠月價差分佈圖"))) %>%
   hc_subtitle(text = list("Source: TAIFEX Database"))%>%
+  hc_tooltip(crosshairs = TRUE) %>%
   hc_add_theme(hc_theme_google()) # to put box vertical) 
 
 ```
 
 ```{r TX.spread.all.2, echo=FALSE}
-highchart() %>%
-  hc_title(text = list(str_c("TX ", year_filter, "近遠月價差分佈圖"))) %>%
+TX.diff.timeseries <- xts(TX.diff[,-1], as.Date(TX.diff$date))
+highchart(type = "stock") %>%
+  hc_title(text = list(str_c("TX 2009 - 2020 年近遠月價差分佈圖"))) %>%
   hc_subtitle(text = list("Source: Source: TAIFEX Database")) %>%
-  hc_xAxis(categories = TX.diff$date) %>%
-  hc_add_series(TX.diff$Spread, yAxis = 0, name = "TX_spread") %>%
-  hc_add_theme(hc_theme_smpl())
+  hc_add_series(TX.diff.timeseries$Spread, yAxis = 0, name = "TX_spread") %>%
+  hc_tooltip(crosshairs = TRUE) %>%
+  hc_add_theme(hc_theme_google())
 
 ```
 
-```{r TX.spread.all.3, echo=FALSE}
-DT::datatable(TX.nearby.deferred,
-              caption = 'Table 2: 價差資料',
-              filter = 'top'
-)
-```
+
+## 區分個年度的價差統計表
+
+-----
 
 
 
-## 所有2020的價差統計表
+### 2020年的價差統計表
 
 我們可以發現，所有逆價差的異常值全部都是在2020年3月的下殺，所以以下有個年度的圖提供參考：
 
@@ -236,19 +216,21 @@ x <- TX.diff %>% filter(T < 6)
 
 hcboxplot(x = x$Spread , var = x$T ) %>% 
   hc_chart(type = "column", color = "#2980b9")%>%
-  hc_title(text = list(str_c("TX ", year_filter, "近遠月價差分佈"))) %>%
+  hc_title(text = list(str_c("TX ", year_filter, "年近遠月價差分佈"))) %>%
   hc_subtitle(text = list("Source: TAIFEX Database"))%>%
-  hc_add_theme(hc_theme_google()) # to put box vertical) 
+  hc_tooltip(crosshairs = TRUE) %>%
+  hc_add_theme(hc_theme_smpl()) # to put box vertical) 
 
 ```
 
 ```{r TX.spread.20.2, echo=FALSE}
-highchart() %>%
-  hc_title(text = list(str_c("TX ", year_filter, "近遠月價差分佈圖"))) %>%
+TX.diff.timeseries <- xts(TX.diff[,-1], as.Date(TX.diff$date))
+highchart(type = "stock") %>%
+  hc_title(text = list(str_c("TX ", year_filter, "年近遠月價差分佈圖"))) %>%
   hc_subtitle(text = list("Source: Source: TAIFEX Database")) %>%
-  hc_xAxis(categories = TX.diff$date) %>%
-  hc_add_series(TX.diff$Spread, yAxis = 0, name = "TX_spread") %>%
-  hc_add_theme(hc_theme_smpl())
+  hc_add_series(TX.diff.timeseries$Spread, yAxis = 0, name = "TX_spread") %>%
+  hc_tooltip(crosshairs = TRUE) %>%
+  hc_add_theme(hc_theme_google())
 
 ```
 
@@ -256,7 +238,7 @@ highchart() %>%
 
 
 
-## 所有2019的價差統計表
+### 2019年的價差統計表
 
 我們可以發現，所有逆價差的異常值全部都是在2020年3月的下殺，所以以下有個年度的圖提供參考：
 
@@ -286,26 +268,93 @@ x <- TX.diff %>% filter(T < 6)
 
 hcboxplot(x = x$Spread , var = x$T ) %>% 
   hc_chart(type = "column", color = "#2980b9")%>%
-  hc_title(text = list(str_c("TX ", year_filter, "近遠月價差分佈"))) %>%
+  hc_title(text = list(str_c("TX ", year_filter, "年近遠月價差分佈"))) %>%
   hc_subtitle(text = list("Source: TAIFEX Database"))%>%
-  hc_add_theme(hc_theme_google()) # to put box vertical) 
+  hc_tooltip(crosshairs = TRUE) %>%
+  hc_add_theme(hc_theme_flat()) # to put box vertical) 
 
 ```
 
 ```{r TX.spread.19.2, echo=FALSE}
-highchart() %>%
-  hc_title(text = list(str_c("TX ", year_filter, "近遠月價差分佈圖"))) %>%
+TX.diff.timeseries <- xts(TX.diff[,-1], as.Date(TX.diff$date))
+highchart(type = "stock") %>%
+  hc_title(text = list(str_c("TX ", year_filter, "年近遠月價差分佈圖"))) %>%
   hc_subtitle(text = list("Source: Source: TAIFEX Database")) %>%
-  hc_xAxis(categories = TX.diff$date) %>%
-  hc_add_series(TX.diff$Spread, yAxis = 0, name = "TX_spread") %>%
-  hc_add_theme(hc_theme_smpl())
+  hc_add_series(TX.diff.timeseries$Spread, yAxis = 0, name = "TX_spread") %>%
+  hc_tooltip(crosshairs = TRUE) %>%
+  hc_add_theme(hc_theme_flat())
 
 ```
 
 
+### 2018年的價差統計表
+
+我們可以發現，所有逆價差的異常值全部都是在2020年3月的下殺，所以以下有個年度的圖提供參考：
+
+```{r TX.tabble5, echo=FALSE}
+year_filter <- 2018
+
+TX.diff <- data.diff %>% 
+  filter(year(date) == year_filter)
+
+knitr::kable(
+  TX.diff %>% 
+    filter(T < 6)%>% 
+    group_by(T) %>% 
+    summarise(min = min(Spread),
+              Qu_1st  = quantile(Spread, 0.25),
+              median = median(Spread),
+              mean = mean(Spread) %>% round(2),
+              Qu_3st = quantile(Spread, 0.75),
+              max = max(Spread)) %>% 
+    arrange(desc(T))
+)
+
+```
+
+```{r TX.spread.18.1, echo=FALSE}
+x <- TX.diff %>% filter(T < 6)
+
+hcboxplot(x = x$Spread , var = x$T ) %>% 
+  hc_chart(type = "column", color = "#2980b9")%>%
+  hc_title(text = list(str_c("TX ", year_filter, "2018近遠月價差分佈"))) %>%
+  hc_subtitle(text = list("Source: TAIFEX Database"))%>%
+  hc_tooltip(crosshairs = TRUE) %>%
+  hc_add_theme(hc_theme_gridlight()) # to put box vertical) 
+
+```
+
+```{r TX.spread.18.2, echo=FALSE}
+
+TX.diff.timeseries <- xts(TX.diff[,-1], as.Date(TX.diff$date))
+highchart(type = "stock") %>%
+  hc_title(text = list(str_c("TX ", year_filter, "年近遠月價差分佈圖"))) %>%
+  hc_subtitle(text = list("Source: Source: TAIFEX Database")) %>%
+  hc_add_series(TX.diff.timeseries$Spread, yAxis = 0, name = "TX_spread") %>%
+  hc_tooltip(crosshairs = TRUE) %>%
+  hc_add_theme(hc_theme_gridlight())
+
+```
 
 
+-----
 
+## TX 近遠月價差資料 Tabble
+
+-----
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r TX.spread.all.3, echo=FALSE}
+TX.nearby.deferred.sub <- TX.nearby.deferred %>% 
+  select(-contract,-trading.session,-settlement.price,-change)
+DT::datatable(TX.nearby.deferred.sub,
+              caption = 'Table 2: 2009 -2020年所有價差資料',
+              filter = 'top', class = 'cell-border stripe'
+)
+```
 
 
 
