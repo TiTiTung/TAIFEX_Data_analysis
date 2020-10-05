@@ -343,15 +343,24 @@ highchart(type = "stock") %>%
 
 -----
 
+
+```{r TX.spread.all.3, echo=FALSE}
+
+DT::datatable(TX.diff,
+              caption = 'Table 2: 2009 -2020年所有價差資料',
+              filter = 'top', class = 'cell-border stripe'
+)
+```
+
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r TX.spread.all.3, echo=FALSE}
+```{r TX.spread.all.4, echo=FALSE}
 TX.nearby.deferred.sub <- TX.nearby.deferred %>% 
   select(-contract,-trading.session,-settlement.price,-change)
 DT::datatable(TX.nearby.deferred.sub,
-              caption = 'Table 2: 2009 -2020年所有價差資料',
+              caption = 'Table 3: 2009 -2020年台指期資料',
               filter = 'top', class = 'cell-border stripe'
 )
 ```

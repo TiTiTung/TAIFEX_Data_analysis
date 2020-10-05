@@ -1,0 +1,12 @@
+name: CR_shiny
+title: CR_shiny
+username:
+account: tttoung
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2946291
+bundleId: 3704523
+url: https://tttoung.shinyapps.io/CR_shiny/
+when: 1601908604.35062
+asMultiple: FALSE
+asStatic: FALSE

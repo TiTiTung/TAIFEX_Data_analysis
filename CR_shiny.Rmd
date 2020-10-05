@@ -1,0 +1,121 @@
+---
+title: "CR_Shiny"
+author: "Ti-Ti Tung"
+date: "2020/10/5"
+output: html_document
+runtime: shiny
+resource_files:
+- TAIFEX_Data_analysis.Rproj
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+source("packages.you.need.R")
+source("zfun.R")
+
+# SPY <- getSymbols("SPY", from = Sys.Date() - lubridate::years(1), auto.assign = FALSE)
+
+
+# TWII <- getSymbols("^TWII", from = as.Date("2005-01-01"), to = input$date, auto.assign = FALSE)
+# TWII <- getSymbols("^TWII", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# ES <- getSymbols("ES=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# YM <- getSymbols("YM=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# NQ <- getSymbols("NQ=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# RTY <- getSymbols("RTY=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# CL <- getSymbols("CL=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# GC <- getSymbols("GC=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# SI <- getSymbols("SI=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# EURUSD <- getSymbols("EURUSD=X", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# TNX <- getSymbols("^TNX", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# JPY <- getSymbols("JPY=X", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+# FTSE <- getSymbols("^FTSE", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+
+
+
+TWII <- getSymbols("^TWII", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+ES <- getSymbols("ES=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+YM <- getSymbols("YM=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+NQ <- getSymbols("NQ=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+RTY <- getSymbols("RTY=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+CL <- getSymbols("CL=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+GC <- getSymbols("GC=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+SI <- getSymbols("SI=F", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+EURUSD <- getSymbols("EURUSD=X", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+TNX <- getSymbols("^TNX", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+JPY <- getSymbols("JPY=X", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+FTSE <- getSymbols("^FTSE", from = as.Date("2005-01-01"), to = Sys.Date(), auto.assign = FALSE) %>% na.approx()
+
+
+all.dat <- cbind(TWII[,4], YM[,4], ES[,4], NQ[,4], RTY[,4], CL[,4], GC[,4], SI[,4], EURUSD[,4], JPY[,4], FTSE[,4], TNX[,4])
+
+
+```
+
+This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+
+```{r eruptions, echo=FALSE}
+
+flowLayout(
+  selectInput("dat.names", label = "Number of bins:",
+              choices = names(all.dat)),
+  
+  # Copy the line below to make a date selector 
+  dateInput("date2", label = "Date input", value = "2020-03-01"),
+  
+  sliderInput("event.window", label = "Bandwidth adjustment:",
+              min = 5, max = 60, value = 10, step = 1)
+  
+  
+)
+
+
+renderPlot({
+
+  CR.dat <- CR(all.dat[,input$dat.names] %>% na.approx(),
+               eventdate = input$date2 , 
+               n = as.numeric(input$event.window) )
+  
+  
+  plot(CR.dat$n,CR.dat[[2,]],"l")
+})
+
+
+
+
+```
+
+-----
+
+```{r tabsets, echo=FALSE}
+
+renderHighchart({
+    CR.dat <- CR(all.dat[,input$dat.names] %>% na.approx(),
+               eventdate = input$date2 , 
+               n = as.numeric(input$event.window) )
+    
+highchart() %>%
+  hc_title(text = list(str_c("商品累計報酬率"))) %>%
+  hc_subtitle(text = list("Source: Source: TAIFEX Database")) %>%
+  hc_xAxis(categories = CR.dat$n) %>%
+  hc_add_series(CR.dat[[2,]], yAxis = 0, name = "TX_spread") %>%
+  hc_add_theme(hc_theme_smpl())
+
+    })
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+

@@ -1,4 +1,6 @@
 source("packages.you.need.R")
+source("zfun.R")
+
 #==================================================================================
 # T-T-Tung
 #==================================================================================
@@ -18,6 +20,7 @@ taifex.commodity <- "MTX"
 # "?down_type=1&commodity_id=TXO&commodity_id2=&queryStartDate=2020%2F09%2F01&queryEndDate=2020%2F09%2F18"
 #==================================================================================
 {
+  # https://rdrr.io/cran/quantmod/man/getSymbols.html
 twii_date <- quantmod::getSymbols("^TWII", auto.assign = FALSE,
                                   from = "2000-01-01", to=Sys.Date()) %>% time()
 start_year <- 2000
